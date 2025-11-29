@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Sparkles, AlertOctagon, LayoutGrid } from 'lucide-react';
+import Lucide from 'lucide-react';
+const { Eye, EyeOff, Sparkles, AlertOctagon, LayoutGrid } = Lucide;
+
 import { Transaction, BudgetContext } from './types';
 import { HomeView } from './components/views/HomeView';
 import { StatsView } from './components/views/StatsView';
@@ -26,10 +28,11 @@ import { triggerHaptic } from './utils';
 
 export default function App() {
   const { 
-    addTransaction, updateTransaction, deleteTransaction, 
+    transactions, addTransaction, updateTransaction, deleteTransaction, 
     budgets, updateBudget, dataError, isOnboarded, userName, 
     activeContext, setActiveContext 
   } = useFinance();
+  
   const { isDark, currency } = useTheme();
   
   const [activeTab, navigate] = useHashLocation();
