@@ -1,9 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+const { useState, useEffect } = React;
 import Lucide from 'lucide-react';
-const { Eye, EyeOff, Sparkles, AlertOctagon, LayoutGrid } = Lucide;
+const { Eye, EyeOff, Sparkles, LayoutGrid, AlertOctagon } = Lucide;
 
-import { Transaction, BudgetContext } from './types';
 import { HomeView } from './components/views/HomeView';
 import { StatsView } from './components/views/StatsView';
 import { HistoryView } from './components/views/HistoryView';
@@ -28,7 +27,7 @@ import { triggerHaptic } from './utils';
 
 export default function App() {
   const { 
-    transactions, addTransaction, updateTransaction, deleteTransaction, 
+    addTransaction, updateTransaction, deleteTransaction, 
     budgets, updateBudget, dataError, isOnboarded, userName, 
     activeContext, setActiveContext 
   } = useFinance();
@@ -49,10 +48,10 @@ export default function App() {
   const [showDebtsModal, setShowDebtsModal] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showTutorialModal, setShowTutorialModal] = useState(false);
-  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [editingTx, setEditingTx] = useState(null);
 
   const [isLocked, setIsLocked] = useState(false);
-  const [savedPin, setSavedPin] = useState<string | null>(null);
+  const [savedPin, setSavedPin] = useState(null);
 
   useEffect(() => {
     if (navigator.storage && navigator.storage.persist) {
@@ -79,32 +78,32 @@ export default function App() {
   const defaultBudgetKey = `${activeContext}-default`;
   const totalBudget = budgets[budgetKey] || budgets[defaultBudgetKey] || 0;
 
-  const changeMonth = (offset: number) => {
+  const changeMonth = (offset) => {
       const newDate = new Date(currentDate);
       newDate.setMonth(newDate.getMonth() + offset);
       setCurrentDate(newDate);
   };
 
-  const handleSaveTransaction = async (txData: Transaction) => {
+  const handleSaveTransaction = async (txData) => {
     if (editingTx) await updateTransaction(txData);
     else await addTransaction(txData);
     triggerHaptic(20);
     setShowTxModal(false); setEditingTx(null);
   };
 
-  const handleDeleteTransaction = (id: number) => {
+  const handleDeleteTransaction = (id) => {
     deleteTransaction(id);
     triggerHaptic(50);
     setShowTxModal(false);
   };
 
-  const handleUpdateBudget = (newAmount: number, monthKey: string, category?: string) => {
+  const handleUpdateBudget = (newAmount, monthKey, category) => {
     updateBudget(newAmount, monthKey, category);
     triggerHaptic(20);
     setShowBudgetModal(false);
   };
   
-  const handleContextSelect = (ctx: BudgetContext) => {
+  const handleContextSelect = (ctx) => {
       setActiveContext(ctx);
       setShowContextPicker(false);
       triggerHaptic(10);
@@ -209,7 +208,7 @@ export default function App() {
         {showSubsModal && <SubscriptionsModal onClose={() => setShowSubsModal(false)} />}
         {showGoalsModal && <GoalsModal onClose={() => setShowGoalsModal(false)} />}
         {showDebtsModal && <DebtsModal onClose={() => setShowDebtsModal(false)} />}
-        {showAIChat && <AIChatModal onClose={() => setShowAIChat(false)} totalBudget={totalBudget} />}
+        {showAIChat && <AIChatModal onClose={() => setShowAIChat(false)} />}
         {showTutorialModal && <TutorialModal onClose={() => setShowTutorialModal(false)} />}
       </div>
     </div>

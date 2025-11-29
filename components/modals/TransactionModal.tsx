@@ -1,16 +1,17 @@
 
-import React, { useState, useRef } from 'react';
-import { X, Trash2, Calendar as CalendarIcon, Edit2, Save, Sparkles, Loader2, Camera, Split, Plus, Minus, Image as ImageIcon, Paperclip } from 'lucide-react';
-import { Transaction } from '../../types';
+import React from 'react';
+const { useState, useRef } = React;
+import Lucide from 'lucide-react';
+const { X, Trash2, Calendar: CalendarIcon, Edit2, Save, Sparkles, Loader2, Camera, Split, Plus, Minus, Image: ImageIcon, Paperclip } = Lucide;
 import { useTransactionForm } from '../../hooks/useTransactionForm';
 import { CurrencyInput } from '../forms/CurrencyInput';
 import { ConfirmationModal } from './ConfirmationModal';
 
 interface TransactionModalProps {
   onClose: () => void;
-  onSave: (tx: Transaction) => void;
+  onSave: (tx: any) => void;
   onDelete: (id: number) => void;
-  initialData: Transaction | null;
+  initialData: any;
   currency: string;
 }
 
@@ -31,15 +32,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
     
     const hasApiKey = !!process.env.API_KEY;
     
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const attachmentInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef(null);
+    const attachmentInputRef = useRef(null);
     
     const totalSplitAmount = splits.reduce((acc, s) => acc + (s.amount || 0), 0);
     const splitRemaining = parseFloat(amount || '0') - totalSplitAmount;
     const isSplitValid = Math.abs(splitRemaining) < 1;
-    const updateSplit = (idx: number, field: string, val: any) => {
+    const updateSplit = (idx, field, val) => {
         const newSplits = [...splits]; 
-        // @ts-ignore
         newSplits[idx][field] = val; 
         setSplits(newSplits);
     };
@@ -179,7 +179,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
 
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-emerald-900/50 dark:text-emerald-100/50 ml-2 block tracking-wider">ATTACH FILE</label>
-                        <input type="file" ref={attachmentInputRef} onChange={handleAttachment} onClick={(e) => (e.target as HTMLInputElement).value = ''} accept="image/*" className="hidden" />
+                        <input type="file" ref={attachmentInputRef} onChange={handleAttachment} onClick={(e) => (e.target).value = ''} accept="image/*" className="hidden" />
                         {!attachment ? (
                             <div onClick={() => attachmentInputRef.current?.click()} className="w-full border-2 border-dashed border-slate-300 dark:border-emerald-800/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-[#021c17] transition-colors group">
                                 <div className="p-3 bg-slate-100 dark:bg-black/20 rounded-full text-slate-400 group-hover:text-emerald-500 transition-colors"><Paperclip size={24} /></div>

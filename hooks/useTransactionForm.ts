@@ -1,11 +1,12 @@
-
-import React, { useState, useEffect } from 'react';
-import { Transaction, TransactionType, TransactionSplit } from '../types';
+import React from 'react';
+const { useState, useEffect } = React;
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../constants';
-import { GoogleGenAI, Type } from "@google/genai";
+import GoogleGenAIModule from "@google/genai";
+const { GoogleGenAI, Type } = GoogleGenAIModule;
 import { fileToGenerativePart, getExchangeRate, compressImage } from '../utils';
 import { getAttachment } from '../utils/db';
-import { z } from 'zod';
+import Zod from 'zod';
+const { z } = Zod;
 
 const AiResponseSchema = z.object({
     amount: z.number().nullable().optional(),
@@ -16,14 +17,14 @@ const AiResponseSchema = z.object({
 });
 
 export const useTransactionForm = (
-    initialData: Transaction | null, 
-    currency: string,
-    onSave: (tx: Transaction) => void
+    initialData, 
+    currency,
+    onSave
 ) => {
     
     const [amount, setAmount] = useState(initialData ? Math.abs(initialData.amount).toString() : '');
     const [title, setTitle] = useState(initialData ? initialData.title : '');
-    const [type, setType] = useState<TransactionType>(initialData ? initialData.type : 'expense');
+    const [type, setType] = useState(initialData ? initialData.type : 'expense');
     const [date, setDate] = useState(() => {
         try {
             return initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
@@ -42,12 +43,12 @@ export const useTransactionForm = (
     const [selectedCurrency, setSelectedCurrency] = useState(initialData?.originalCurrency || currency);
     const [originalAmount, setOriginalAmount] = useState(initialData?.originalAmount?.toString() || '');
     
-    const currencyCodes: Record<string, string> = { '₹': 'INR', '$': 'USD', '€': 'EUR', '£': 'GBP', 'AED': 'AED', '¥': 'JPY' };
+    const currencyCodes = { '₹': 'INR', '$': 'USD', '€': 'EUR', '£': 'GBP', 'AED': 'AED', '¥': 'JPY' };
 
     const [isSplitMode, setIsSplitMode] = useState(!!initialData?.splits);
-    const [splits, setSplits] = useState<TransactionSplit[]>(initialData?.splits || []);
+    const [splits, setSplits] = useState(initialData?.splits || []);
 
-    const [attachment, setAttachment] = useState<string | null>(null);
+    const [attachment, setAttachment] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     useEffect(() => {
@@ -85,7 +86,7 @@ export const useTransactionForm = (
         }
     }, [selectedCurrency, originalAmount]);
 
-    const handleAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAttachment = async (e) => {
         if (e.target.files && e.target.files[0]) {
             try {
                 const compressed = await compressImage(e.target.files[0]);
@@ -95,7 +96,7 @@ export const useTransactionForm = (
         e.target.value = '';
     };
 
-    const analyzeReceipt = async (file: File) => {
+    const analyzeReceipt = async (file) => {
         setIsAnalyzing(true);
         try {
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -162,7 +163,7 @@ export const useTransactionForm = (
         finally { setIsAnalyzing(false); }
     };
 
-    const handleAiTextParse = async (text: string) => {
+    const handleAiTextParse = async (text) => {
         setIsAnalyzing(true);
         try {
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -201,7 +202,7 @@ export const useTransactionForm = (
 
                 if (data.amount) setAmount(data.amount.toString());
                 if (data.merchant) setTitle(data.merchant);
-                if (data.type) setType(data.type as TransactionType);
+                if (data.type) setType(data.type);
                 if (data.category) {
                      const list = data.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
                      const found = list.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
@@ -212,7 +213,7 @@ export const useTransactionForm = (
         finally { setIsAnalyzing(false); }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!amount) return;
         
@@ -222,7 +223,7 @@ export const useTransactionForm = (
             return;
         }
 
-        const txData: Transaction = {
+        const txData: any = {
             id: initialData ? initialData.id : Date.now(),
             title: title || (isSplitMode ? 'Split Transaction' : category.name),
             category: isSplitMode ? 'Split' : category.name,

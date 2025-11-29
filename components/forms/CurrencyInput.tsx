@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
-import { RefreshCcw, ChevronDown, Check, X } from 'lucide-react';
+import React from 'react';
+const { useState } = React;
+import Lucide from 'lucide-react';
+const { RefreshCcw, ChevronDown, Check, X } = Lucide;
 
 interface CurrencyInputProps {
     amount: string;

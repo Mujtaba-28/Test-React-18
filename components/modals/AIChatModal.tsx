@@ -1,8 +1,10 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Sparkles, User, Bot, Loader2, AlertTriangle } from 'lucide-react';
-import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
-import { ChatMessage } from '../../types';
+import React from 'react';
+const { useState, useRef, useEffect } = React;
+import Lucide from 'lucide-react';
+const { X, Send, Sparkles, User, Bot, Loader2, AlertTriangle } = Lucide;
+import GoogleGenAIModule from "@google/genai";
+const { GoogleGenAI, FunctionDeclaration, Type } = GoogleGenAIModule;
 import { useFinance } from '../../contexts/FinanceContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../../constants';
@@ -14,19 +16,19 @@ interface AIChatModalProps {
 export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
     const { addTransaction, addGoal, updateBudget, addSubscription } = useFinance();
     const { currency } = useTheme();
-    const [messages, setMessages] = useState<ChatMessage[]>([
+    const [messages, setMessages] = useState([
         { id: '1', role: 'model', text: `Hi! I can now perform actions. Try saying "Add a goal for New Car 50k" or "Spent 500 on Food".`, timestamp: new Date() }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef(null);
     
     const hasApiKey = !!process.env.API_KEY;
 
     const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); };
     useEffect(() => { scrollToBottom(); }, [messages]);
 
-    const addTransactionTool: FunctionDeclaration = {
+    const addTransactionTool = {
         name: 'addTransaction',
         description: 'Add a new financial transaction (expense or income).',
         parameters: {
@@ -41,7 +43,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
         }
     };
 
-    const addGoalTool: FunctionDeclaration = {
+    const addGoalTool = {
         name: 'addGoal',
         description: 'Create a new savings goal.',
         parameters: {
@@ -54,7 +56,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
         }
     };
 
-    const updateBudgetTool: FunctionDeclaration = {
+    const updateBudgetTool = {
         name: 'updateBudget',
         description: 'Update the monthly budget limit.',
         parameters: {
@@ -66,7 +68,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
         }
     };
     
-    const addSubscriptionTool: FunctionDeclaration = {
+    const addSubscriptionTool = {
         name: 'addSubscription',
         description: 'Add a recurring subscription.',
         parameters: {
@@ -82,7 +84,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
 
     const handleSend = async () => {
         if (!input.trim() || !hasApiKey) return;
-        const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: input, timestamp: new Date() };
+        const userMsg = { id: Date.now().toString(), role: 'user', text: input, timestamp: new Date() };
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setIsLoading(true);
@@ -110,7 +112,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
             if (call) {
                 let resultText = "Done.";
                 if (call.name === 'addTransaction' && call.args) {
-                    const args = call.args as any;
+                    const args = call.args;
                     await addTransaction({
                         id: Date.now(),
                         title: args.title || 'AI Entry',
@@ -121,7 +123,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
                     });
                     resultText = `✅ Added ${args.type}: ${currency}${args.amount} for ${args.category}.`;
                 } else if (call.name === 'addGoal' && call.args) {
-                    const args = call.args as any;
+                    const args = call.args;
                     addGoal({
                         id: Date.now().toString(),
                         name: args.name,
@@ -132,10 +134,10 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
                     });
                      resultText = `✅ Created goal "${args.name}" for ${currency}${args.targetAmount}.`;
                 } else if (call.name === 'updateBudget' && call.args?.amount) {
-                    updateBudget(call.args.amount as number, 'default');
+                    updateBudget(call.args.amount, 'default');
                     resultText = `✅ Budget updated to ${currency}${call.args.amount}.`;
                 } else if (call.name === 'addSubscription' && call.args?.name && call.args?.amount) {
-                     const args = call.args as any;
+                     const args = call.args;
                      addSubscription({
                          id: Date.now().toString(),
                          name: args.name,
@@ -150,7 +152,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
                 setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: resultText, timestamp: new Date() }]);
                 
             } else if (response.text) {
-                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: response.text as string, timestamp: new Date() }]);
+                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: response.text, timestamp: new Date() }]);
             }
 
         } catch (error) {
